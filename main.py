@@ -1,46 +1,44 @@
 import random
 
+# Borders containing 'p' and 'q' values (don't make them too widely spread)
 LEFT_BORDER = 10
 RIGHT_BORDER = 15
 
 
-# The maximum size of block of characters from the text
-BLOCK_SIZE = None
-
-
-def multiplicative_inverse(e, phi):
-    d = 0
-    x1 = 0
-    x2 = 1
-    y1 = 1
-    temp_phi = phi
-
-    while e > 0:
-        temp1 = temp_phi//e
-        temp2 = temp_phi - temp1 * e
-        temp_phi = e
-        e = temp2
-
-        x = x2 - temp1 * x1
-        y = d - temp1 * y1
-
-        x2 = x1
-        x1 = x
-        d = y1
-        y1 = y
-
-    if temp_phi == 1:
-        return d + phi
-
-
-# Function gets the greatest common divisor of two numbers
+# Function gets the greatest common divisor of two numbers using Euclid's algorithm
 def gcd(a, b):
     while b != 0:
         a, b = b, a % b
     return a
 
 
-# Function generates two large numbers
+# Standard Euclid's algorithm can be extended to find, given a and b, integers 'x' and 'y' such that 'ax + by = d',
+# where 'd' is the greatest common divisor of 'a' and 'b'
+def ext_gcd(a, b):
+    if a == 0:
+        gcd = b
+        # 'x' from description
+        c1 = 0
+        # 'y' from description
+        c2 = 1
+        return gcd, c1, c2
+    else:
+        gcd, c1, c2 = ext_gcd(b % a, a)
+        return gcd, c2 - (b // a) * c1, c1
+
+
+# Function find the multiplicative inverse of the number
+# Let's call some mul.inv. 'b'
+# It is mul.inv for 'a' modulo 'c' if:
+# a * b % c = 1
+# Function is used to calculate 'd' value for 'e' value in RSA
+def mul_inv(num, mod):
+    g, x, _ = ext_gcd(num, mod)
+    if g == 1:
+        return x % mod
+
+
+# Function generates two prime numbers
 def generate_p_q():
     p = random.randint(LEFT_BORDER, RIGHT_BORDER)
     q = random.randint(LEFT_BORDER, RIGHT_BORDER)
@@ -68,6 +66,7 @@ def check_prime(num):
 
 # Function checks if two numbers are co-primes
 def check_co_prime(a, b):
+    # They are co-primes only if their GCD is 1
     if gcd(a, b) == 1:
         return True
     else:
@@ -76,77 +75,43 @@ def check_co_prime(a, b):
 
 # Function finds a co-prime number for another given number
 def find_co_prime(num):
-    # All co-prime numbers
     options = list()
     for i in range(num):
         if check_co_prime(i, num):
             options.append(i)
-    # Choose one of the numbers
+    # Choose one of the numbers from the list
     res = random.choice(options)
     return res
 
 
 # Function finds an 'e' value of RSA
 def find_e(d, phi):
-    e = multiplicative_inverse(d, phi)
+    # 'e' is a multiplicative inverse of d modulo phi
+    e = mul_inv(d, phi)
     return e
 
 
-# Function splits text to blocks of characters of fixed size
-def to_blocks(text) -> [[str]]:
-    blocks = [text[k:k + BLOCK_SIZE] for k in range(0, len(text), BLOCK_SIZE)]
-    blocks = list(map(list, blocks))
-    return blocks
-
-
-# Function concatenates blocks to text
-def to_text(blocks) -> str:
+# Function converts array of integers into text
+def to_text(nums) -> str:
     text = ''
-    for block in blocks:
-        for num in block:
-            text += chr(num)
+    for num in nums:
+        text += chr(num)
     return text
 
 
-# Function encodes a single block of characters
-def encode_block(block, key):
-    e, n = key
-    encoded_block = list()
-    for char in block:
-        encoded_char = (ord(char) ** e) % n
-        encoded_block.append(int(encoded_char))
-    return encoded_block
-
-
-# Function decodes a single block of characters
-def decode_block(block, key):
-    d, n = key
-    decoded_block = list()
-    for char in block:
-        decoded_char = (ord(char) ** d) % n
-        decoded_block.append(int(decoded_char))
-    return decoded_block
-
-
+# Function encodes a raw text
 def encode(text, key):
-    # First text should be separated to blocks of fixed size
-    blocks = to_blocks(text)
-    encoded_blocks = list()
-    for block in blocks:
-        encoded_blocks.append(encode_block(block, key))
-    # Concatenate block to a single string back again
-    res = to_text(encoded_blocks)
+    e, n = key
+    res = [ord(char) ** e % n for char in text]
+    res = to_text(res)
     return res
 
 
+# Function decodes encoded text
 def decode(text, key):
-    # First text should be separated to blocks of fixed size
-    blocks = to_blocks(text)
-    decoded_blocks = list()
-    for block in blocks:
-        decoded_blocks.append(decode_block(block, key))
-    # Concatenate block to a single string back again
-    res = to_text(decoded_blocks)
+    d, n = key
+    res = [ord(char) ** d % n for char in text]
+    res = to_text(res)
     return res
 
 
@@ -162,8 +127,6 @@ if __name__ == "__main__":
     # Forming public and private keys
     public_key = (e, n)
     private_key = (d, n)
-    # Fix the block size
-    BLOCK_SIZE = n
     # Encoding / Decoding the text
     encoded_text = encode(raw_text, public_key)
     decoded_text = decode(encoded_text, private_key)
