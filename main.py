@@ -3,14 +3,16 @@ import random
 LEFT_BORDER = 10
 RIGHT_BORDER = 15
 
-# TODO p and q should be prime - DONE
-# TODO e should be co-prime to prod!!! - DONE
-# TODO e should be smaller than prod - DONE
-# TODO number e should be prime! - DONE
-
 
 # The maximum size of block of characters from the text
 BLOCK_SIZE = None
+
+
+# Function gets the greatest common divisor of two numbers
+def gcd(a, b):
+    while b != 0:
+        a, b = b, a % b
+    return a
 
 
 # Function generates two large numbers
@@ -41,15 +43,7 @@ def check_prime(num):
 
 # Function checks if two numbers are co-primes
 def check_co_prime(a, b):
-    # Get the smallest of two numbers
-    m = min(a, b)
-    # The divider of two numbers
-    div = None
-    # Iterate up to the smallest of the numbers
-    for i in range(1, m + 1):
-        if (a % i == 0) and (b % i == 0):
-            div = i
-    if div == 1:
+    if gcd(a, b) == 1:
         return True
     else:
         return False
@@ -68,17 +62,15 @@ def find_co_prime(num):
 
 
 # Function finds an 'e' value of RSA
-# d - co-prime number
-# prod - (p-1)*(q-1)
-def find_e(d, prod):
+def find_e(d, phi):
     # Options of (e * d)
-    options = [(prod * i + 1) for i in range(100)]
+    options = [(phi * i + 1) for i in range(100)]
     # 'e' values from those options
     es = [int(el / d) for el in options]
     # only prime numbers should be left
     es = list(filter(check_prime, es))
     for e in es:
-        if check_co_prime(e, prod) and e < prod:
+        if check_co_prime(e, phi) and e < phi:
             return e
 
 
@@ -146,9 +138,11 @@ if __name__ == "__main__":
     # Generating integers to work with
     p, q = generate_p_q()
     n = p * q
-    d = find_co_prime((p-1)*(q-1))
-    e = find_e(d, (p-1)*(q-1))
+    phi = (p-1) * (q-1)
+    d = find_co_prime(phi)
+    e = find_e(d, phi)
     # Forming public and private keys
+    # TODO ne or en?
     public_key = (e, n)
     private_key = (d, n)
     # Fix the block size
