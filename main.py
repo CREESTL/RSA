@@ -8,6 +8,31 @@ RIGHT_BORDER = 15
 BLOCK_SIZE = None
 
 
+def multiplicative_inverse(e, phi):
+    d = 0
+    x1 = 0
+    x2 = 1
+    y1 = 1
+    temp_phi = phi
+
+    while e > 0:
+        temp1 = temp_phi//e
+        temp2 = temp_phi - temp1 * e
+        temp_phi = e
+        e = temp2
+
+        x = x2 - temp1 * x1
+        y = d - temp1 * y1
+
+        x2 = x1
+        x1 = x
+        d = y1
+        y1 = y
+
+    if temp_phi == 1:
+        return d + phi
+
+
 # Function gets the greatest common divisor of two numbers
 def gcd(a, b):
     while b != 0:
@@ -63,15 +88,8 @@ def find_co_prime(num):
 
 # Function finds an 'e' value of RSA
 def find_e(d, phi):
-    # Options of (e * d)
-    options = [(phi * i + 1) for i in range(100)]
-    # 'e' values from those options
-    es = [int(el / d) for el in options]
-    # only prime numbers should be left
-    es = list(filter(check_prime, es))
-    for e in es:
-        if check_co_prime(e, phi) and e < phi:
-            return e
+    e = multiplicative_inverse(d, phi)
+    return e
 
 
 # Function splits text to blocks of characters of fixed size
@@ -142,7 +160,6 @@ if __name__ == "__main__":
     d = find_co_prime(phi)
     e = find_e(d, phi)
     # Forming public and private keys
-    # TODO ne or en?
     public_key = (e, n)
     private_key = (d, n)
     # Fix the block size
