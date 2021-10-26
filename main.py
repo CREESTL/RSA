@@ -126,6 +126,7 @@ if __name__ == "__main__":
     encoded_text = encode(raw_text, public_key)
     decoded_text = decode(encoded_text, private_key)
     # Printing the results
+    print(f"Generated keys: {public_key}(public) {private_key}(private)")
     try:
         print(f"Encoded text is: {encoded_text}")
     except UnicodeEncodeError:
