@@ -3,8 +3,10 @@ from time import time
 
 # Borders containing 'p' and 'q' values
 # The more numbers are between these borders - the slower the program works!
-LEFT_BORDER = 10
-RIGHT_BORDER = 1000
+# 1 and 100 is OK for English
+# 1 and 500 is OK for English and Russian
+LEFT_BORDER = 1
+RIGHT_BORDER = 500
 
 
 # Function gets the greatest common divisor of two numbers using Euclid's algorithm
@@ -89,9 +91,6 @@ def to_text(nums) -> str:
 # Function encodes a raw text
 def encode(text, key) -> str:
     e, n = key
-    for char in text:
-        if ord(char) > n:
-            print(f'!!! char is {char} ord is {ord(char)} n is {n}')
     res = [ord(char) ** e % n for char in text]
     res = to_text(res)
     return res
@@ -107,7 +106,7 @@ def decode(text, key) -> str:
 
 if __name__ == "__main__":
     # Getting a raw user input
-    raw_text = input("Enter text to encode (UTF-8 characters only!): ")
+    raw_text = input("Enter text to encode: ")
     # Start measuring time
     start = time()
     # Generating integers to work with
