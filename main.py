@@ -4,6 +4,9 @@ import random
 LEFT_BORDER = 10
 RIGHT_BORDER = 15
 
+# TODO now works wrong with Russian because in this case ord(char) > n
+# TODO bring blocks back ! Make it works with any language from UTF-8
+
 
 # Function gets the greatest common divisor of two numbers using Euclid's algorithm
 def gcd(a, b):
@@ -12,30 +15,18 @@ def gcd(a, b):
     return a
 
 
-# Standard Euclid's algorithm can be extended to find, given a and b, integers 'x' and 'y' such that 'ax + by = d',
-# where 'd' is the greatest common divisor of 'a' and 'b'
-def ext_gcd(a, b):
-    if a == 0:
-        gcd = b
-        # 'x' from description
-        c1 = 0
-        # 'y' from description
-        c2 = 1
-        return gcd, c1, c2
-    else:
-        gcd, c1, c2 = ext_gcd(b % a, a)
-        return gcd, c2 - (b // a) * c1, c1
-
-
-# Function find the multiplicative inverse of the number
-# Let's call some mul.inv. 'b'
-# It is mul.inv for 'a' modulo 'c' if:
-# a * b % c = 1
-# Function is used to calculate 'd' value for 'e' value in RSA
-def mul_inv(num, mod):
-    g, x, _ = ext_gcd(num, mod)
-    if g == 1:
-        return x % mod
+# Function finds the multiplicative inverse of the number
+def rev_mod(d, phi):
+    i = 1
+    num = phi * i + 1
+    e = num / d
+    # Equation is: e * d % phi = 1
+    # So each iteration we get one of possible values of e * d, then divide it by d and check if result is integer
+    while not e.is_integer():
+        i += 1
+        num = phi * i + 1
+        e = num / d
+    return int(e)
 
 
 # Function generates two prime numbers
@@ -84,13 +75,6 @@ def find_co_prime(num):
     return res
 
 
-# Function finds an 'e' value of RSA
-def find_e(d, phi):
-    # 'e' is a multiplicative inverse of d modulo phi
-    e = mul_inv(d, phi)
-    return e
-
-
 # Function converts array of integers into text
 def to_text(nums) -> str:
     text = ''
@@ -102,6 +86,9 @@ def to_text(nums) -> str:
 # Function encodes a raw text
 def encode(text, key):
     e, n = key
+    for char in text:
+        if ord(char) > n:
+            print(f'!!! char is {char} ord is {ord(char)} n is {n}')
     res = [ord(char) ** e % n for char in text]
     res = to_text(res)
     return res
@@ -123,7 +110,7 @@ if __name__ == "__main__":
     n = p * q
     phi = (p-1) * (q-1)
     d = find_co_prime(phi)
-    e = find_e(d, phi)
+    e = rev_mod(d, phi)
     # Forming public and private keys
     public_key = (e, n)
     private_key = (d, n)
