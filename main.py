@@ -112,7 +112,7 @@ if __name__ == "__main__":
     # Each character is converted to number using ord(). No number converted this way must be bigger than 'n'!!!!
     # The bigger 'p' and 'q' are (set LEFT_BORDER and RIGHT_BORDER wider) - the more characters the program will work
     # with correctly. It's better if 'p' * 'q' is bigger than 2000
-    # If n is too small - the program will crash even on Latin characters sometimes///
+    # If 'n' is too small - the program will crash even on Latin characters sometimes...
     n = p * q
     phi = (p-1) * (q-1)
     d = find_co_prime(phi)
@@ -123,5 +123,6 @@ if __name__ == "__main__":
     # Encoding / Decoding the text
     encoded_text = encode(raw_text, public_key)
     decoded_text = decode(encoded_text, private_key)
+    # Printing the results
     print(f"Encoded text is: {encoded_text}")
     print(f"Decoded text is: {decoded_text}")
