@@ -1,4 +1,5 @@
 import random
+from time import time
 
 # Borders containing 'p' and 'q' values
 # The more numbers are between these borders - the slower the program works!
@@ -28,7 +29,7 @@ def rev_mod(d, phi) -> int:
 
 
 # Function generates two prime numbers
-def generate_p_q() -> tuple[int, int]:
+def generate_p_q():
     # Generate two random numbers in the borders
     p = random.randint(LEFT_BORDER, RIGHT_BORDER)
     q = random.randint(LEFT_BORDER, RIGHT_BORDER)
@@ -107,6 +108,8 @@ def decode(text, key) -> str:
 if __name__ == "__main__":
     # Getting a raw user input
     raw_text = input("Enter text to encode (UTF-8 characters only!): ")
+    # Start measuring time
+    start = time()
     # Generating integers to work with
     p, q = generate_p_q()
     # Each character is converted to number using ord(). No number converted this way must be bigger than 'n'!!!!
@@ -124,5 +127,13 @@ if __name__ == "__main__":
     encoded_text = encode(raw_text, public_key)
     decoded_text = decode(encoded_text, private_key)
     # Printing the results
-    print(f"Encoded text is: {encoded_text}")
+    try:
+        print(f"Encoded text is: {encoded_text}")
+    except UnicodeEncodeError:
+        # Not each time 'to_text()' works correctly because the encoded numbers might be too big
+        print("Encoded text can't be printed in Unicode symbols, sorry.")
     print(f"Decoded text is: {decoded_text}")
+    # Stop measuring time
+    end = time()
+    time_dif = end - start
+    print(f"The program took {time_dif} seconds to finish.")
